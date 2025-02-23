@@ -100,7 +100,7 @@ if st.button("Run Data Science") and 'df' in st.session_state and st.session_sta
                 except Exception as e:
                     st.error(f"👁️ **:red[Visualization Agent]**: I wasn't able to show the visualization due to the following execution error: {e}")
 
-            report = agents.reporter(plan, st.session_state.next_step, final_results, explanation, visualization, df_head_string)
+            report = agents.reporter(plan, st.session_state.next_step, final_results, explanation, visualization, df_head_string, user_input)
             report_message = f"🎙️ **:violet[Reporter Agent]**: {report}"
             st.info(report_message)
         else:

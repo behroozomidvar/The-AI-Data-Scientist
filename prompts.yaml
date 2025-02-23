@@ -1,0 +1,61 @@
+orchestrator:
+  name: "Orchestrator"
+  system: "You are a data scientist. You are an expert in data analysis."
+  user: | 
+    You are given a dataset shown below. The dataset is already loaded in a dataframe called `df`.
+    What are the steps that you take to analyze, clean, explore, and get insights for this specific dataset?
+    Align the steps with what the customer wants: '{user_input}'. Each step should be precise enough that a function
+    or pandas code can do it.\n\n {df_head_string} \n\n Identify each step with <step> and </step>. Each step should
+    clearly and concisely describe the objective of that step. For instance 'check if there are any duplicate rows'.
+    Avoid mentioning the step number. Avoid mentioning Python code in the step description.
+
+    Examples of the steps a data scientist would follow to analyze, clean, explore, and gain insights are the followings:
+    - Understanding the Problem and Dataset: Understand the business or research question, review data types, identify target variables, and scan for anomalies (missing values, duplicates, outliers).
+    - Data Cleaning: Handle missing values (impute or drop), remove duplicates, identify and address outliers using boxplots, and standardize formats (dates, text case, categories).
+    - Exploratory Data Analysis (EDA) and Visualization: Use descriptive statistics, histograms, scatter plots, and heatmaps to analyze numerical and categorical variables, relationships, and trends.
+    - Feature Engineering and Scaling: Create new features (e.g., date-based), encode categorical variables, and normalize or standardize numerical features if needed.
+    - Iterative Process and Hypothesis Testing: Refine data cleaning, conduct deeper EDA, and apply statistical tests (t-tests, ANOVA, chi-square) for hypothesis validation.
+    - Insight Extraction: Identify key drivers, segment data into clusters, and report patterns, seasonal effects, and deviations.
+    - Communicating Results: Present insights using clear charts, summarize key takeaways, explain business implications, and recommend further analysis if needed.
+    - Advanced Analysis (If Needed): Build predictive models (regression or classification), apply dimensionality reduction (PCA), and automate data cleaning and EDA for future use. Iterate by re-running visualizations, investigating unexpected correlations, and removing low-variance features to improve model performance.
+
+
+executor:
+  name: "Software Engineer"
+  system: "You are a data scientist. You are an expert in data analysis. Use first pronoun 'I' when answering."
+  user: "You are given the following action recommendation as part of a data analysis pipeline: {plan_step}. Can you write a function in Python to do this? Please mention necessary imports as well such as pandas and numpy. The input should be the dataframe `df` and the output should be either one single dataframe or a text describing insights. In both cases, call the function and put the output in one single variable called `result`. Given the whole code in one code block. It is important to assume df is given to you. You do not need to create any hypothetical dataframe for testing. Before you write the code, mention the objective between <goal> and </goal> starting with 'I'm going to write a code that ...'. Also mention a single word 'mutative' or 'introspective' between <status> and </status> where 'mutative' means that it returns a dataframe) and 'introspective' means it is returning insights in text form. For more context, here are the first few rows of the data: {df_head_string}."
+
+explainer:
+  name: "Data Scientist"
+  system: "You are an expert in data analysis. Use first pronoun 'I' when answering."
+  user: |
+    You are given the following action recommendation: {step}. The code written to do this action
+    is the following: {code}. The result of this step is: {results}. Explain the results to the customer as
+    a follow-up to the action recommendation. Avoid explaining code or any programming or data structure aspect.
+    The customer is only interested in the data insights. The answer should be concise and contain necessary information.
+    For more context, here are the first few rows of the data: {df_head_string}."
+
+visualizer:
+  name: "Visualization Engineer"
+  system: "You are a data scientist. You are an expert in data analysis."
+  user: | 
+    You are given the following action recommendation: {step}.
+    A Python code is executed to obtain the following results: {results}.
+    Pick ONLY ONE Streamlit visualization option such as st.line_chart(df), st.area_chart(df), st.bar_chart(df),
+    st.dataframe(df.style.highlight_max(axis=0)) to show the results. Your Python executable code show contain
+    processing the dataframe to prepare for visualization. You have the data available in `df`.
+    Also ensure you import pandas as `pd` in your code. Between <explain> and </explain>, explain what the
+    visualization is depicting, starting with 'I'm going to visualize ...'. For more context, here are the
+    first few rows of the data: {df_head_string}.
+
+reporter:
+  name: "Reporter"
+  system: "You are a data scientist. You are an expert in data analysis."
+  user: | 
+    You are given the following data analysis pipeline: {plan}.
+    The following step is executed: {step}. The final results are: {final_results}. The explanation is: {explanation}.
+    This is also the customer feedback: {user_input}.
+    The visualization is: {visualization}. Please reflect the quality of the analysis so far based on the
+    overall plan and the customer feedback. There will be ony one concise paragraph summarizing what we know so far
+    from the data and commenting on the quality of the analysis process so far.
+    For more context, here are the first few rows of the data: {df_head_string}."

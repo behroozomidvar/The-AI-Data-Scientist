@@ -14,7 +14,7 @@ if 'messages' not in st.session_state:
     st.session_state['messages'] = []
 if 'df' not in st.session_state:
     uploaded_file = "Example_DataSet.xlsx"
-    df = pd.read_excel(uploaded_file, sheet_name='Sales')
+    df = pd.read_excel(uploaded_file, sheet_name='Sensors')
     df.columns = df.columns.str.lower().str.strip()
     st.session_state.df = df
 if 'log' not in st.session_state:
@@ -35,8 +35,8 @@ if "show_messages" not in st.session_state:
     st.session_state["show_messages"] = False  # Flag to show messages after the first click
 
 # ✅ Streamlit UI
-st.set_page_config(page_title="Data Scientist LLM Agent", page_icon="🚀")
-st.title("📊 Data Scientist LLM Agent")
+st.set_page_config(page_title="The AI Data Scientist", page_icon="🚀")
+st.title("📊 The AI Data Scientist")
 
 # ✅ Define a dictionary with emoji icons as avatars
 avatar_mapping = {
@@ -134,7 +134,7 @@ if proceed_button:
 
                 report = agents.reporter(st.session_state.plan_steps, st.session_state.next_step, final_results,
                                          explanation, visualization,
-                                         df_head_string)
+                                         df_head_string, user_input)
                 report_message = f"**Reporter Agent**: {report}"
                 st.session_state['messages'].append({"role": "reporter agent", "content": report_message})
 
@@ -172,7 +172,10 @@ if st.session_state["show_messages"]:
                         st.error(f"Visualization Error: {str(e)}")
                         continue
                 else:
-                    st.markdown(message["content"])
+                    if message["content"] == "":
+                        st.markdown("_(No message communicated.)_")
+                    else:
+                        st.markdown(message["content"])
 
 
 # ✅ Sidebar content persists now
