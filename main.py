@@ -73,6 +73,19 @@ def visualizer(step, results, explanation, df_head_string):
         response = response.choices[0].message.content.strip()
     return response
 
+# Reporter Agent
+def reporter(plan, step, final_results, explanation, visualization, df_head_string):
+    with st.spinner("🎙️💭 Reporter agent is working ..."):
+        response = openai.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a data scientist. You are an expert in data analysis."},
+                {"role": "user", "content": f"You are given the following data analysis pipeline: {plan}. The following step is executed: {step}. The final results are: {final_results}. The explanation is: {explanation}. The visualization is: {visualization}. Please reflect the quality of the analyis so far based on the overall plan. The will be two paragraphs, one summarizing what we know so far from the data, and one commenting on the analysis process so far. For more context, here are the first few rows of the data: {df_head_string}."}
+            ]
+        )
+        response = response.choices[0].message.content.strip()
+    return response
+
 uploaded_file = "Example_DataSet.xlsx"
 df = pd.read_excel(uploaded_file)
 df.columns = df.columns.str.lower().str.strip()
@@ -84,8 +97,9 @@ if st.button("Run Data Science") and 'df' in st.session_state and st.session_sta
         plan = orchestrator()
         plan_pattern = r'<step>(.*?)</step>'
         steps = re.findall(plan_pattern, plan, re.DOTALL)
+        number_of_steps = len(steps)
         for step_cnt, step in enumerate(steps):
-            st.subheader(f"Step {step_cnt+1}")
+            st.subheader(f"Step {step_cnt+1} of {number_of_steps}")
             orchestrator_message = f"🤖 **:orange[Orchestrator Agent]**: In step {step_cnt+1}, I do the following: {step}"
             st.info(orchestrator_message)
 
@@ -121,26 +135,36 @@ if st.button("Run Data Science") and 'df' in st.session_state and st.session_sta
                 except Exception as e:
                     st.warning(f"🧑‍💻 **:green[Software Engineer Agent]**: I failed in executing the code in my attempt {attempt} due to the following error: {str(e)}. Let me try again.")
             
-            with st.expander("📊 **Generated Results**"):
-                st.code(final_results)
-            explanation = explainer(step, python_code[0], final_results, df_head_string)
-            explanation_message = f"🧑‍🔬 **:blue[Data Scientist Agent]**: {explanation}"
-            st.info(explanation_message)
+            if successful_code == True:
+                st.info(f"🧑‍💻 **:green[Software Engineer Agent]**: I succeeded to execute the code after {attempt} attempt(s).")
+                with st.expander("📊 **Generated Results**"):
+                    st.code(final_results)
+                explanation = explainer(step, python_code[0], final_results, df_head_string)
+                explanation_message = f"🧑‍🔬 **:blue[Data Scientist Agent]**: {explanation}"
+                st.info(explanation_message)
             
-            visualization = visualizer(step, final_results, explanation, df_head_string)
-            # st.warning(visualization)
-            python_viz_code = re.findall(r"```python\n(.*?)\n```", visualization, re.DOTALL)
-            viz_explain_pattern = r'<explain>(.*?)</explain>'
-            viz_explain = re.findall(viz_explain_pattern, visualization, re.DOTALL)
-            viz_explain_message = f"👁️ **:red[Visualization Agent]**: {viz_explain[0].strip()}"
-            st.info(viz_explain_message)
-            exec_globals = {"df": st.session_state.df, "result": None}  # Ensure correct dataframe modification
-            if python_viz_code:
-                try:
-                    exec(python_viz_code[0], exec_globals)
-                except Exception as e:
-                    st.error(f"👁️ **:red[Visualization Agent]**: I wasn't able to show the visualization due to the following execution error: {e}")
+                visualization = visualizer(step, final_results, explanation, df_head_string)
+                # st.warning(visualization)
+                python_viz_code = re.findall(r"```python\n(.*?)\n```", visualization, re.DOTALL)
+                viz_explain_pattern = r'<explain>(.*?)</explain>'
+                viz_explain = re.findall(viz_explain_pattern, visualization, re.DOTALL)
+                viz_explain_message = f"👁️ **:red[Visualization Agent]**: {viz_explain[0].strip()}"
+                st.info(viz_explain_message)
+                exec_globals = {"df": st.session_state.df, "result": None}  # Ensure correct dataframe modification
+                if python_viz_code:
+                    try:
+                        exec(python_viz_code[0], exec_globals)
+                    except Exception as e:
+                        st.error(f"👁️ **:red[Visualization Agent]**: I wasn't able to show the visualization due to the following execution error: {e}")
 
+                report = reporter(plan, step, final_results, explanation, visualization, df_head_string)
+                report_message = f"🎙️ **:violet[Reporter Agent]**: {report}"
+                st.info(report_message)
+            else:
+                st.error(f"🧑‍💻 **:green[Software Engineer Agent]**: I failed to execute the code after {attempt} attempt(s).")
+
+            if step_cnt > 4:
+                break
 
 
 # Display process log
