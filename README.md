@@ -1,2 +1,3 @@
 # The-AI-Data-Scientist
-The AI Data Scientist
+
+Run `streamlit run main.py`
