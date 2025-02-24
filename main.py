@@ -4,6 +4,7 @@ import openai
 import os
 import re
 import agents
+import utils
 
 # Set OpenAI API key from environment variable
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -38,17 +39,6 @@ if "show_messages" not in st.session_state:
 # ✅ Streamlit UI
 st.set_page_config(page_title="Sentravia: The AI Data Scientist", page_icon="🚀")
 st.title("📊 Sentravia: The AI Data Scientist")
-
-# ✅ Define a dictionary with emoji icons as avatars
-avatar_mapping = {
-    "user": "👤",
-    "orchestrator agent": "🤖",
-    "software engineer agent": "🧑‍💻",
-    "data scientist agent": "🧑‍🔬",
-    "visualization agent": "👁️",
-    "reporter agent": "🎙️",
-    "visualization": "📊"
-}
 
 # ✅ Input box and button in a container to prevent shifting
 with st.container():
@@ -155,76 +145,7 @@ if proceed_button:
         st.session_state['messages'].append(
             {"role": "orchestrator agent", "content": "**:orange[Orchestrator Agent]**: All steps have been successfully completed!"})
 
-# ✅ Display messages grouped by user message and reverse order
+# Display messages
 if st.session_state["show_messages"]:
-    # Step 1: Group messages by user message
-    groups = []
-    current_group = []
-    for message in st.session_state['messages']:
-        if message['role'] == "user" and current_group:
-            groups.append(current_group)  # Save the previous group
-            current_group = []
-        current_group.append(message)
-    if current_group:
-        groups.append(current_group)  # Save the last group
-
-    # Step 2: Reverse the order of groups
-    groups.reverse()
-
-    # Step 3: Display each group in order (latest first)
-    for group in groups:
-        for message in group:
-            avatar = avatar_mapping.get(message["role"], "💬")
-            with st.chat_message(message["role"], avatar=avatar):
-                if message["role"] == "visualization":
-                    successful_viz = False
-                    attempt_viz = 0
-                    while attempt_viz < 4 and not successful_viz:
-                        attempt_viz += 1
-                        try:
-                            exec_globals = {"df": st.session_state.df, "st": st}  # ✅ Pass st for visualizations
-                            exec(message["content"].strip(), exec_globals)
-                            successful_viz = True
-                        except Exception as e:
-                            st.warning(f"**Visualization Agent**: Visualization failed in attempt {attempt_viz} due to `{str(e)}`. Retrying...")
-
-                    # If still not successful after all attempts
-                    if not successful_viz:
-                        st.error("**Visualization Agent**: ❌ I could not generate the visualization after 3 attempts.")
-                
-                else:
-                    if message["content"] == "":
-                        st.markdown("_(No message communicated.)_")
-                    else:
-                        st.markdown(message["content"])
-
-
-# ✅ Sidebar content persists now
-with st.sidebar:
-    if st.session_state["plan_steps"]:
-        with st.expander("📋 **Plan Steps**"):
-            st.write(st.session_state["plan_steps"])
-
-    if st.session_state["generated_code"]:
-        with st.expander("💻 **Generated Python Code**"):
-            st.code(st.session_state["generated_code"], language="python")
-    else:
-        st.write("No code generated yet.")
-
-    if st.session_state["generated_result"] is not None:
-        with st.expander("💻 **Generated Results**"):
-            st.write(st.session_state["generated_result"])
-    else:
-        st.write("No results generated yet.")
-
-    if st.session_state["generated_viz_code"]:
-        with st.expander("💻 **Generated Viz Code**"):
-            st.code(st.session_state["generated_viz_code"], language="python")
-    else:
-        st.write("No code generated yet.")
-
-    if st.session_state["generated_report"]:
-        with st.expander("💻 **Generated Report**"):
-            st.markdown(st.session_state["generated_report"])
-    else:
-        st.write("No report generated yet.")
+    utils.show_messages(st.session_state['messages'])
+utils.show_sidebar(st.session_state)
