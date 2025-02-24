@@ -1,3 +1,3 @@
 # The-AI-Data-Scientist
 
-Run `streamlit run main.py`
+Run `streamlit run test-st.py`
