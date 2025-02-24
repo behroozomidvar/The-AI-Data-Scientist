@@ -9,14 +9,22 @@ import utils
 # Set OpenAI API key from environment variable
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+# ✅ Streamlit UI
+st.set_page_config(page_title="Sentravia: The AI Data Scientist", page_icon="🚀")
+st.title("📊 Sentravia: The AI Data Scientist")
+
 # ✅ Initialize session state once
 if 'messages' not in st.session_state:
     st.session_state['messages'] = []
 if 'df' not in st.session_state:
-    uploaded_file = "Example_DataSet.xlsx"
-    df = pd.read_excel(uploaded_file, sheet_name='Sensors')
-    df.columns = df.columns.str.lower().str.strip()
-    st.session_state.df = df
+    with st.sidebar:
+        uploaded_file = st.file_uploader("Upload your Excel file", type=["xlsx"])
+        if uploaded_file:
+            xls = pd.ExcelFile(uploaded_file)
+            sheet_name = st.selectbox("Select a sheet", xls.sheet_names)
+            st.session_state.df = pd.read_excel(uploaded_file, sheet_name=sheet_name)
+            st.session_state.df.columns = st.session_state.df.columns.str.lower().str.strip()
+
 if 'log' not in st.session_state:
     st.session_state.log = []
 if 'next_step' not in st.session_state:
@@ -36,10 +44,6 @@ if "generated_report" not in st.session_state:
 if "show_messages" not in st.session_state:
     st.session_state["show_messages"] = False  # Flag to show messages after the first click
 
-# ✅ Streamlit UI
-st.set_page_config(page_title="Sentravia: The AI Data Scientist", page_icon="🚀")
-st.title("📊 Sentravia: The AI Data Scientist")
-
 # ✅ Input box and button in a container to prevent shifting
 with st.container():
     user_input = st.text_area("Define your data science task below.", key="user_input")
@@ -50,8 +54,12 @@ with st.container():
     else:
         button_label = "Proceed"  # Default label before starting or after finishing
 
-    proceed_button = st.button(button_label)
+    proceed_button = st.button(button_label, disabled='df' not in st.session_state)
 
+    if 'df' in st.session_state:
+        with st.sidebar:
+            st.success("Dataframe loaded successfully!", icon="✅")
+            
 # ✅ Button Logic (Second click now works as expected)
 if proceed_button:
     st.session_state["show_messages"] = True  # Show messages after the first click
