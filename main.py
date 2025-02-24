@@ -121,7 +121,7 @@ if proceed_button:
                 explanation = agents.explainer(st.session_state.next_step, python_code[0], final_results, df_head_string)
                 explanation_message = f"**Data Scientist Agent**: {explanation}"
                 st.session_state['messages'].append({"role": "data scientist agent", "content": explanation_message})
-
+                
                 visualization = agents.visualizer(st.session_state.next_step, final_results, explanation, df_head_string)
                 python_viz_code = re.findall(r"```python\n([\s\S]*?)\n```", visualization)
                 viz_explain_pattern = r'<explain>(.*?)</explain>'
@@ -132,7 +132,7 @@ if proceed_button:
                 if python_viz_code:
                     st.session_state["generated_viz_code"] = python_viz_code[0]
                     st.session_state['messages'].append({"role": "visualization", "content": python_viz_code[0]})
-
+                
                 report = agents.reporter(st.session_state.plan_steps, st.session_state.next_step, final_results,
                                          explanation, visualization,
                                          df_head_string, user_input)
@@ -177,12 +177,21 @@ if st.session_state["show_messages"]:
             avatar = avatar_mapping.get(message["role"], "💬")
             with st.chat_message(message["role"], avatar=avatar):
                 if message["role"] == "visualization":
-                    try:
-                        exec_globals = {"df": st.session_state.df, "st": st}  # ✅ Pass st for visualizations
-                        exec(message["content"].strip(), exec_globals)
-                    except Exception as e:
-                        st.error(f"Visualization Error: {str(e)}")
-                        continue
+                    successful_viz = False
+                    attempt_viz = 0
+                    while attempt_viz < 4 and not successful_viz:
+                        attempt_viz += 1
+                        try:
+                            exec_globals = {"df": st.session_state.df, "st": st}  # ✅ Pass st for visualizations
+                            exec(message["content"].strip(), exec_globals)
+                            successful_viz = True
+                        except Exception as e:
+                            st.warning(f"**Visualization Agent**: Visualization failed in attempt {attempt_viz} due to `{str(e)}`. Retrying...")
+
+                    # If still not successful after all attempts
+                    if not successful_viz:
+                        st.error("**Visualization Agent**: ❌ I could not generate the visualization after 3 attempts.")
+                
                 else:
                     if message["content"] == "":
                         st.markdown("_(No message communicated.)_")

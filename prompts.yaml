@@ -46,7 +46,8 @@ visualizer:
     A Python code is executed to obtain the following results: {results}.
     Pick ONLY ONE Streamlit visualization option such as st.line_chart(df), st.area_chart(df), st.bar_chart(df),
     st.dataframe(df.style.highlight_max(axis=0)) to show the results. Your Python executable code show contain
-    processing the dataframe to prepare for visualization. You have the data available in `df`.
+    processing the dataframe to prepare for visualization. The Python code should be between ```python and ```.
+    You have the data available in `df`.
     Also ensure you import pandas as `pd` in your code. Between <explain> and </explain>, explain what the
     visualization is depicting, starting with 'I'm going to visualize ...'. For more context, here are the
     first few rows of the data: {df_head_string}.
