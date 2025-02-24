@@ -4,7 +4,6 @@ import openai
 import os
 import re
 import agents
-import util
 
 # Set OpenAI API key from environment variable
 openai.api_key = os.getenv("OPENAI_API_KEY")
