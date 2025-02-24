@@ -9,6 +9,9 @@ orchestrator:
     clearly and concisely describe the objective of that step. For instance 'check if there are any duplicate rows'.
     Avoid mentioning the step number. Avoid mentioning Python code in the step description.
 
+    When setting up the steps, please pay attention to the preferences of the customer described below:
+    {user_preference}
+
     Examples of the steps a data scientist would follow to analyze, clean, explore, and gain insights are the followings:
     - Understanding the Problem and Dataset: Understand the business or research question, review data types, identify target variables, and scan for anomalies (missing values, duplicates, outliers).
     - Data Cleaning: Handle missing values (impute or drop), remove duplicates, identify and address outliers using boxplots, and standardize formats (dates, text case, categories).
@@ -59,3 +62,9 @@ reporter:
     overall plan and the customer feedback. There will be ony one concise paragraph summarizing what we know so far
     from the data and commenting on the quality of the analysis process so far.
     For more context, here are the first few rows of the data: {df_head_string}."
+
+user_preference:
+  description: |
+    I'm a senior data scientist with deep expertise in data anylsis.
+    Avoid basic steps such as Understanding the Problem and Dataset.
+    I want you to focus more on more advanced insights including hypothesis testing and insight extraction.

@@ -12,7 +12,7 @@ def call_openai(agent_name, **kwargs):
     system_prompt = prompt_data["system"]
     user_prompt = prompt_data["user"].format(**kwargs)
     agent_title = prompt_data["name"]
-
+    
     with st.spinner(f"💭 {agent_title.capitalize()} agent is acting ..."):
         response = openai.chat.completions.create(
             model=kwargs.get("model", "gpt-4"),
@@ -25,7 +25,8 @@ def call_openai(agent_name, **kwargs):
 
 # Functions for each agent
 def orchestrator(df_head_string, user_input):
-    return call_openai("orchestrator", df_head_string=df_head_string, user_input=user_input, model="gpt-4o-mini")
+    user_preference = PROMPTS['user_preference']['description']
+    return call_openai("orchestrator", df_head_string=df_head_string, user_input=user_input, model="gpt-4o-mini", user_preference=user_preference)
 
 def executor(plan_step, df_head_string):
     return call_openai("executor", plan_step=plan_step, df_head_string=df_head_string, model="gpt-4o-mini")
