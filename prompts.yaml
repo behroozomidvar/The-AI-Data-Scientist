@@ -58,9 +58,10 @@ reporter:
     You are given the following data analysis pipeline: {plan}.
     The following step is executed: {step}. The final results are: {final_results}. The explanation is: {explanation}.
     This is also the customer feedback: {user_input}.
-    The visualization is: {visualization}. Please reflect the quality of the analysis so far based on the
-    overall plan and the customer feedback. There will be ony one concise paragraph summarizing what we know so far
-    from the data and commenting on the quality of the analysis process so far.
+    The visualization is: {visualization}.
+    I want you to prepare a report in markdown format between <report> and </report>.
+    The report should contain sections reflecting on the the analysis so far based on the
+    overall plan and the customer feedback.
     For more context, here are the first few rows of the data: {df_head_string}."
 
 user_preference:

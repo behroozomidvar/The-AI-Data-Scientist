@@ -30,6 +30,8 @@ if "generated_viz_code" not in st.session_state:
     st.session_state["generated_viz_code"] = None
 if "generated_result" not in st.session_state:
     st.session_state["generated_result"] = None
+if "generated_report" not in st.session_state:
+    st.session_state["generated_report"] = None
 if "show_messages" not in st.session_state:
     st.session_state["show_messages"] = False  # Flag to show messages after the first click
 
@@ -134,7 +136,18 @@ if proceed_button:
                 report = agents.reporter(st.session_state.plan_steps, st.session_state.next_step, final_results,
                                          explanation, visualization,
                                          df_head_string, user_input)
-                report_message = f"**Reporter Agent**: {report}"
+                report_pattern = r'<report>(.*?)</report>'
+                report_text = re.findall(report_pattern, report, re.DOTALL)[0]
+                report_file_path = "report.md"  # Replace with your desired file name
+                if st.session_state.next_step_id > 1:
+                    with open(report_file_path, 'a') as file:
+                        file.write(report_text)
+                else:
+                    with open(report_file_path, 'w') as file:
+                        file.write(report_text)
+                
+                st.session_state["generated_report"] = report_text
+                report_message = f"**Reporter Agent**: I updated the report in `report.md`."
                 st.session_state['messages'].append({"role": "reporter agent", "content": report_message})
 
         st.session_state.next_step_id += 1
@@ -200,3 +213,9 @@ with st.sidebar:
             st.code(st.session_state["generated_viz_code"], language="python")
     else:
         st.write("No code generated yet.")
+
+    if st.session_state["generated_report"]:
+        with st.expander("💻 **Generated Report**"):
+            st.markdown(st.session_state["generated_report"])
+    else:
+        st.write("No report generated yet.")
